@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seguimiento de Mantenimiento</title>
+<style>
+  :root{
+    --bg:#0f172a; --panel:#1e293b; --panel2:#243044; --line:#334155;
+    --txt:#e2e8f0; --muted:#94a3b8;
+    --pendiente:#64748b; --planificada:#3b82f6; --ejecucion:#f59e0b; --terminada:#22c55e;
+    --hoy:#ef4444;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);color:var(--txt);font-size:14px}
+  header{padding:20px 28px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
+  header h1{font-size:20px;margin:0}
+  header .meta{color:var(--muted);font-size:12px}
+  .wrap{padding:24px 28px;max-width:1200px;margin:0 auto}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:32px 0 12px}
+  .cards{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;min-width:120px}
+  .card .n{font-size:24px;font-weight:600}
+  .card .l{color:var(--muted);font-size:12px;margin-top:2px}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 0;color:var(--muted);font-size:12px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:11px;height:11px;border-radius:3px;display:inline-block}
+  /* Gantt */
+  .gantt{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .grow{display:grid;grid-template-columns:240px 1fr;border-top:1px solid var(--line)}
+  .grow:first-child{border-top:none}
+  .glabel{padding:10px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:2px;min-width:0}
+  .glabel .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .glabel .sub{color:var(--muted);font-size:11px}
+  .gtrack{position:relative;height:auto;min-height:46px;padding:11px 0}
+  .gbar{position:absolute;height:22px;border-radius:6px;top:11px;display:flex;align-items:center;padding:0 8px;
+    font-size:11px;color:#0b1020;font-weight:600;white-space:nowrap;overflow:hidden;min-width:4px}
+  .gbar-open{background:transparent;border:1.5px dashed;font-weight:600}
+  .ghead{display:grid;grid-template-columns:240px 1fr;background:var(--panel2)}
+  .ghead .gl{padding:8px 14px;border-right:1px solid var(--line);color:var(--muted);font-size:12px}
+  .gaxis{position:relative;height:30px}
+  .tick{position:absolute;top:0;height:100%;border-left:1px solid var(--line);padding-left:6px;color:var(--muted);font-size:11px;padding-top:7px}
+  .hoy{position:absolute;top:0;bottom:0;width:2px;background:var(--hoy);z-index:5}
+  .hoy .tag{position:absolute;top:-1px;left:3px;color:var(--hoy);font-size:10px;font-weight:600}
+  /* tabla pendientes */
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{text-align:left;padding:10px 14px;border-top:1px solid var(--line);font-size:13px}
+  th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:12px;border-top:none}
+  .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;color:#0b1020}
+  .prio{display:inline-block;min-width:22px;text-align:center;padding:2px 6px;border-radius:6px;font-weight:700;font-size:12px}
+  .empty{color:var(--muted);padding:14px;font-style:italic}
+  .id{color:var(--muted);font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔧 Seguimiento de Mantenimiento</h1>
+  <span class="meta" id="meta"></span>
+</header>
+<div class="wrap">
+  <div class="cards" id="cards"></div>
+  <div class="legend">
+    <span><i class="dot" style="background:var(--pendiente)"></i>Pendiente</span>
+    <span><i class="dot" style="background:var(--planificada)"></i>Planificada</span>
+    <span><i class="dot" style="background:var(--ejecucion)"></i>En ejecución</span>
+    <span><i class="dot" style="background:var(--terminada)"></i>Terminada</span>
+  </div>
+
+  <h2>Línea de tiempo (tareas con fechas)</h2>
+  <div id="gantt"></div>
+
+  <h2>Tareas pendientes</h2>
+  <div id="pendientes"></div>
+
+  <h2>Tareas terminadas (presupuesto vs. real)</h2>
+  <div id="terminadas"></div>
+</div>
+
+<script>
+// Los datos se inyectan al regenerar este archivo.
+const DB = {
+  "proyecto": "AdminEco",
+  "actualizado": "2026-06-20T12:24:59-03:00",
+  "ultimo_id": 10,
+  "tareas": [
+    {
+      "id": "T-001",
+      "nombre": "Reparar puerta de cerco perimetral (esquina cartel del barrio)",
+      "descripcion": "",
+      "tipo": "herreria",
+      "prioridad": 0,
+      "presupuesto": null,
+      "costo_final": null,
+      "fecha_inicio": null,
+      "fecha_fin_estimada": null,
+      "estado": "pendiente",
+      "creada": "2026-06-20T11:49:45-03:00",
+      "actualizada": "2026-06-20T11:51:39-03:00",
+      "historial": [
+        {
+          "ts": "2026-06-20T11:49:45-03:00",
+          "accion": "creada",
+          "cambios": {
+            "nombre": "Reparar puerta de cerco perimetral (esquina cartel del barrio)",
+            "tipo": "herreria",
+            "estado": "pendiente"
+          }
+        },
+        {
+          "ts": "2026-06-20T11:51:39-03:00",
+          "accion": "actualizada",
+          "cambios": {
+            "prioridad": { "de": null, "a": 0 }
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-002",
+      "nombre": "Viga sobre pase (esquina cartel)",
+      "descripcion": "Colocar viga sobre el pase para que quede a nivel con el cerco eléctrico",
+      "tipo": "construccion",
+      "prioridad": 0,
+      "presupuesto": null,
+      "costo_final": null,
+      "fecha_inicio": null,
+      "fecha_fin_estimada": null,
+      "estado": "pendiente",
+      "creada": "2026-06-20T11:57:27-03:00",
+      "actualizada": "2026-06-20T11:57:27-03:00",
+      "historial": [
+        {
+          "ts": "2026-06-20T11:57:27-03:00",
+          "accion": "creada",
+          "cambios": {
+            "nombre": "Viga sobre pase (esquina cartel)",
+            "descripcion": "Colocar viga sobre el pase para que quede a nivel con el cerco eléctrico",
+            "tipo": "construccion",
+            "prioridad": 0,
+            "estado": "pendiente"
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-003",
+      "nombre": "Retirar postes enterrados sobre boulevard",
+      "descripcion": "Retirar los postes enterrados, nivelar con tierra negra y hacer disposal de los palos",
+      "tipo": "jardineria",
+      "prioridad": 1,
+      "presupuesto": null,
+      "costo_final": null,
+      "fecha_inicio": null,
+      "fecha_fin_estimada": null,
+      "estado": "pendiente",
+      "creada": "2026-06-20T12:02:29-03:00",
+      "actualizada": "2026-06-20T12:02:29-03:00",
+      "historial": [
+        {
+          "ts": "2026-06-20T12:02:29-03:00",
+          "accion": "creada",
+          "cambios": {
+            "nombre": "Retirar postes enterrados sobre boulevard",
+            "descripcion": "Retirar los postes enterrados, nivelar con tierra negra y hacer disposal de los palos",
+            "tipo": "jardineria",
+            "prioridad": 1,
+            "estado": "pendiente"
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-004",
+      "nombre": "Limpieza de cámaras de vigilancia",
+      "descripcion": "",
+      "tipo": "limpieza",
+      "prioridad": 2,
+      "presupuesto": null,
+      "costo_final": null,
+      "fecha_inicio": null,
+      "fecha_fin_estimada": null,
+      "estado": "pendiente",
+      "creada": "2026-06-20T12:03:52-03:00",
+      "actualizada": "2026-06-20T12:03:52-03:00",
+      "historial": [
+        {
+          "ts": "2026-06-20T12:03:52-03:00",
+          "accion": "creada",
+          "cambios": {
+            "nombre": "Limpieza de cámaras de vigilancia",
+            "tipo": "limpieza",
+            "prioridad": 2,
+            "estado": "pendiente"
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-005",
+      "nombre": "Tomas nuevos en garita y mantenimiento eléctrico",
+      "descripcion": "Agregar tomas y zapatilla, revisar teclas. Agregar un toma para que se banque la estufa eléctrica",
+      "tipo": "electricidad",
+      "prioridad": 0,
+      "presupuesto": null,
+      "costo_final": null,
+      "fecha_inicio": null,
+      "fecha_fin_estimada": null,
+      "estado": "pendiente",
+      "creada": "2026-06-20T12:07:35-03:00",
+      "actualizada": "2026-06-20T12:09:46-03:00",
+      "historial": [
+        {
+          "ts": "2026-06-20T12:07:35-03:00",
+          "accion": "creada",
+          "cambios": {
+            "nombre": "Tomas nuevos en garita y mantenimiento eléctrico",
+            "descripcion": "Agregar tomas y zapatilla, revisar teclas",
+            "tipo": "electricidad",
+            "prioridad": 0,
+            "estado": "pendiente"
+          }
+        },
+        {
+          "ts": "2026-06-20T12:09:46-03:00",
+          "accion": "actualizada",
+          "cambios": {
+            "descripcion": {
+              "de": "Agregar tomas y zapatilla, revisar teclas",
+              "a": "Agregar tomas y zapatilla, revisar teclas. Agregar un toma para que se banque la estufa eléctrica"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-006",
+      "nombre": "Luz de emergencia en garita",
+      "descripcion": "Instalar luz de emergencia que se prenda automáticamente frente a un corte de luz",
+      "tipo": "electricidad",
+      "prioridad": 0,
+      "presupuesto": null,
+      "costo_final": null,
+      "fecha_inicio": null,
+      "fecha_fin_estimada": null,
+      "estado": "pendiente",
+      "creada": "2026-06-20T12:08:19-03:00",
+      "actualizada": "2026-06-20T12:08:19-03:00",
+      "historial": [
+        {
+          "ts": "2026-06-20T12:08:19-03:00",
+          "accion": "creada",
+          "cambios": {
+            "nombre": "Luz de emergencia en garita",
+            "descripcion": "Instalar luz de emergencia que se prenda automáticamente frente a un corte de luz",
+            "tipo": "electricidad",
+            "prioridad": 0,
+            "estado": "pendiente"
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-007",
+      "nombre": "Comprar estufa eléctrica a aceite para la garita",
+      "descripcion": "",
+      "tipo": "adecuacion de garita",
+      "prioridad": 0,
+      "presupuesto": null,
+      "costo_final": null,
+      "fecha_inicio": null,
+      "fecha_fin_estimada": null,
+      "estado": "pendiente",
+      "creada": "2026-06-20T12:08:59-03:00",
+      "actualizada": "2026-06-20T12:08:59-03:00",
+      "historial": [
+        {
+          "ts": "2026-06-20T12:08:59-03:00",
+          "accion": "creada",
+          "cambios": {
+            "nombre": "Comprar estufa eléctrica a aceite para la garita",
+            "tipo": "adecuacion de garita",
+            "prioridad": 0,
+            "estado": "pendiente"
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-008",
+      "nombre": "Poda de los árboles",
+      "descripcion": "",
+      "tipo": "jardineria",
+      "prioridad": 0,
+      "presupuesto": null,
+      "costo_final": null,
+      "fecha_inicio": "2026-07-10",
+      "fecha_fin_estimada": null,
+      "estado": "planificada",
+      "creada": "2026-06-20T12:17:35-03:00",
+      "actualizada": "2026-06-20T12:19:05-03:00",
+      "historial": [
+        {
+          "ts": "2026-06-20T12:17:35-03:00",
+          "accion": "creada",
+          "cambios": {
+            "nombre": "Poda de los árboles",
+            "tipo": "jardineria",
+            "fecha_inicio": "2026-07-10",
+            "estado": "planificada"
+          }
+        },
+        {
+          "ts": "2026-06-20T12:19:05-03:00",
+          "accion": "actualizada",
+          "cambios": {
+            "prioridad": { "de": null, "a": 0 }
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-009",
+      "nombre": "Limpieza y zanjeo",
+      "descripcion": "Limpieza y remoción de material en zanjas y pases",
+      "tipo": "limpieza",
+      "prioridad": 4,
+      "presupuesto": null,
+      "costo_final": null,
+      "fecha_inicio": null,
+      "fecha_fin_estimada": null,
+      "estado": "pendiente",
+      "creada": "2026-06-20T12:19:05-03:00",
+      "actualizada": "2026-06-20T12:19:05-03:00",
+      "historial": [
+        {
+          "ts": "2026-06-20T12:19:05-03:00",
+          "accion": "creada",
+          "cambios": {
+            "nombre": "Limpieza y zanjeo",
+            "descripcion": "Limpieza y remoción de material en zanjas y pases",
+            "tipo": "limpieza",
+            "prioridad": 4,
+            "estado": "pendiente"
+          }
+        }
+      ]
+    },
+    {
+      "id": "T-010",
+      "nombre": "Comprar linterna táctica FENIX recargable",
+      "descripcion": "",
+      "tipo": "compras",
+      "prioridad": 0,
+      "presupuesto": null,
+      "costo_final": null,
+      "fecha_inicio": null,
+      "fecha_fin_estimada": null,
+      "estado": "pendiente",
+      "creada": "2026-06-20T12:24:59-03:00",
+      "actualizada": "2026-06-20T12:24:59-03:00",
+      "historial": [
+        {
+          "ts": "2026-06-20T12:24:59-03:00",
+          "accion": "creada",
+          "cambios": {
+            "nombre": "Comprar linterna táctica FENIX recargable",
+            "tipo": "compras",
+            "prioridad": 0,
+            "estado": "pendiente"
+          }
+        }
+      ]
+    }
+  ]
+};
+
+const ESTADOS = {
+  "pendiente":{label:"Pendiente",color:"var(--pendiente)",raw:"#64748b"},
+  "planificada":{label:"Planificada",color:"var(--planificada)",raw:"#3b82f6"},
+  "en ejecucion":{label:"En ejecución",color:"var(--ejecucion)",raw:"#f59e0b"},
+  "terminada":{label:"Terminada",color:"var(--terminada)",raw:"#22c55e"}
+};
+const norm = s => (s||"").toString().trim().toLowerCase().replace("ejecución","ejecucion");
+const estadoInfo = s => ESTADOS[norm(s)] || ESTADOS["pendiente"];
+const parseD = s => { if(!s) return null; const d=new Date(s+"T00:00:00"); return isNaN(d)?null:d; };
+const fmtMoney = n => (n==null||n==="")?"—":new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(Number(n));
+const fmtSigned = n => { n=Number(n)||0; const s=fmtMoney(Math.abs(n)); return n>0?("+"+s):n<0?("−"+s):s; };
+const fmtD = d => d? d.toLocaleDateString("es-AR",{day:"2-digit",month:"short"}) : "—";
+const prioColor = p => p<=1?"#ef4444":p<=3?"#f59e0b":p<=6?"#3b82f6":"#475569";
+
+const tareas = DB.tareas||[];
+document.getElementById("meta").textContent =
+  (DB.proyecto?("Proyecto: "+DB.proyecto+"  ·  "):"") +
+  (DB.actualizado?("Actualizado: "+new Date(DB.actualizado).toLocaleString("es-AR")):"");
+
+// Tarjetas resumen
+const counts = {pendiente:0,planificada:0,"en ejecucion":0,terminada:0};
+tareas.forEach(t=>counts[norm(t.estado)]=(counts[norm(t.estado)]||0)+1);
+const presupuestoTotal = tareas.reduce((a,t)=>a+(Number(t.presupuesto)||0),0);
+const terminadas = tareas.filter(t=>norm(t.estado)==="terminada");
+const desvioTotal = terminadas.reduce((a,t)=>{
+  const p=Number(t.presupuesto), c=Number(t.costo_final);
+  return a + ((isFinite(p)&&isFinite(c)&&t.costo_final!=null&&t.presupuesto!=null)?(c-p):0);
+},0);
+const cards = [
+  {n:tareas.length,l:"Tareas totales"},
+  {n:counts["en ejecucion"]||0,l:"En ejecución"},
+  {n:counts.pendiente||0,l:"Pendientes"},
+  {n:counts.terminada||0,l:"Terminadas"},
+  {n:fmtMoney(presupuestoTotal),l:"Presupuesto total"},
+  {n:fmtSigned(desvioTotal),l:"Desvío acumulado",color:desvioTotal>0?"#ef4444":desvioTotal<0?"#22c55e":null}
+];
+document.getElementById("cards").innerHTML = cards.map(c=>
+  `<div class="card"><div class="n"${c.color?` style="color:${c.color}"`:""}>${c.n}</div><div class="l">${c.l}</div></div>`).join("");
+
+// ---- Gantt ----
+// Incluye toda tarea con fecha de inicio. Si no tiene fin estimada, se dibuja
+// como barra abierta (punteada) desde el inicio.
+const conFechas = tareas.filter(t=>parseD(t.fecha_inicio))
+  .sort((a,b)=>parseD(a.fecha_inicio)-parseD(b.fecha_inicio));
+const gEl = document.getElementById("gantt");
+if(!conFechas.length){
+  gEl.innerHTML = '<div class="gantt"><div class="empty">No hay tareas con fecha de inicio. Cargá fecha de inicio (y fin estimada) para verlas acá.</div></div>';
+}else{
+  let min=Infinity,max=-Infinity;
+  conFechas.forEach(t=>{
+    const s=parseD(t.fecha_inicio), e=parseD(t.fecha_fin_estimada);
+    min=Math.min(min,s); max=Math.max(max, e||s);
+  });
+  const hoy=new Date(); hoy.setHours(0,0,0,0);
+  min=Math.min(min,hoy); max=Math.max(max,hoy);
+  const pad=(max-min)*0.06||7*86400000; min-=pad; max+=pad;
+  const span=max-min;
+  const pct = d => ((d-min)/span*100);
+  // ticks ~ inicio de cada mes
+  let ticks=[]; let c=new Date(min); c.setDate(1); c.setHours(0,0,0,0);
+  while(c<=max){ if(c>=min) ticks.push(new Date(c)); c.setMonth(c.getMonth()+1); }
+  const axis = `<div class="ghead"><div class="gl">Tarea</div><div class="gaxis">`+
+    ticks.map(t=>`<span class="tick" style="left:${pct(t)}%">${t.toLocaleDateString("es-AR",{month:"short",year:"2-digit"})}</span>`).join("")+
+    `<div class="hoy" style="left:${pct(hoy)}%"><span class="tag">hoy</span></div></div></div>`;
+  const rows = conFechas.map(t=>{
+    const s=parseD(t.fecha_inicio), e=parseD(t.fecha_fin_estimada), info=estadoInfo(t.estado);
+    const left=pct(s);
+    if(e){
+      // barra normal inicio → fin
+      const width=Math.max(pct(e)-pct(s),1.2);
+      return `<div class="grow">
+        <div class="glabel"><span class="nm">${esc(t.nombre)}</span>
+          <span class="sub"><span class="id">${t.id||""}</span> · P${t.prioridad??"—"} · ${info.label}</span></div>
+        <div class="gtrack"><div class="hoy" style="left:${pct(hoy)}%"></div>
+          <div class="gbar" style="left:${left}%;width:${width}%;background:${info.raw}"
+            title="${esc(t.nombre)} (${fmtD(s)} → ${fmtD(e)})">${fmtD(s)} → ${fmtD(e)}</div></div></div>`;
+    }else{
+      // sin fin estimada: barra abierta punteada desde el inicio
+      const width=Math.max(100-left-2, 6);
+      return `<div class="grow">
+        <div class="glabel"><span class="nm">${esc(t.nombre)}</span>
+          <span class="sub"><span class="id">${t.id||""}</span> · P${t.prioridad??"—"} · ${info.label} · sin fin est.</span></div>
+        <div class="gtrack"><div class="hoy" style="left:${pct(hoy)}%"></div>
+          <div class="gbar gbar-open" style="left:${left}%;width:${width}%;border-color:${info.raw};color:${info.raw}"
+            title="${esc(t.nombre)} (desde ${fmtD(s)}, sin fin estimada)">▸ desde ${fmtD(s)}</div></div></div>`;
+    }
+  }).join("");
+  gEl.innerHTML = `<div class="gantt">${axis}${rows}</div>`;
+}
+
+// ---- Pendientes (estado pendiente o planificada, no terminadas) ----
+const pend = tareas.filter(t=>["pendiente","planificada"].includes(norm(t.estado)))
+  .sort((a,b)=>(a.prioridad-b.prioridad)|| (parseD(a.fecha_inicio)||Infinity)-(parseD(b.fecha_inicio)||Infinity));
+const pEl=document.getElementById("pendientes");
+if(!pend.length){
+  pEl.innerHTML='<table><tbody><tr><td class="empty">No hay tareas pendientes ni planificadas. 🎉</td></tr></tbody></table>';
+}else{
+  pEl.innerHTML = `<table><thead><tr>
+    <th>ID</th><th>Prioridad</th><th>Tarea</th><th>Estado</th><th>Inicio</th><th>Fin est.</th><th>Presupuesto</th>
+    </tr></thead><tbody>`+
+    pend.map(t=>{const info=estadoInfo(t.estado);return `<tr>
+      <td class="id">${t.id||""}</td>
+      <td><span class="prio" style="background:${prioColor(t.prioridad)};color:#fff">${t.prioridad}</span></td>
+      <td><strong>${esc(t.nombre)}</strong><br><span style="color:var(--muted);font-size:12px">${esc(t.descripcion||"")}</span></td>
+      <td><span class="badge" style="background:${info.raw}">${info.label}</span></td>
+      <td>${fmtD(parseD(t.fecha_inicio))}</td>
+      <td>${fmtD(parseD(t.fecha_fin_estimada))}</td>
+      <td>${fmtMoney(t.presupuesto)}</td></tr>`;}).join("")+
+    `</tbody></table>`;
+}
+
+// ---- Terminadas (presupuesto vs costo final, desvío) ----
+const term = terminadas.slice().sort((a,b)=>(parseD(b.actualizada)||0)-(parseD(a.actualizada)||0));
+const tEl=document.getElementById("terminadas");
+if(!term.length){
+  tEl.innerHTML='<table><tbody><tr><td class="empty">Todavía no hay tareas terminadas.</td></tr></tbody></table>';
+}else{
+  tEl.innerHTML = `<table><thead><tr>
+    <th>ID</th><th>Tarea</th><th>Fin est.</th><th>Presupuesto</th><th>Costo final</th><th>Desvío</th>
+    </tr></thead><tbody>`+
+    term.map(t=>{
+      const p=t.presupuesto, c=t.costo_final;
+      const hay=(p!=null&&p!==""&&c!=null&&c!=="");
+      const d=hay?(Number(c)-Number(p)):null;
+      const col=d==null?"var(--muted)":d>0?"#f87171":d<0?"#4ade80":"var(--muted)";
+      return `<tr>
+        <td class="id">${t.id||""}</td>
+        <td><strong>${esc(t.nombre)}</strong></td>
+        <td>${fmtD(parseD(t.fecha_fin_estimada))}</td>
+        <td>${fmtMoney(p)}</td>
+        <td>${(c==null||c==="")?'<span style="color:var(--muted)">pendiente</span>':fmtMoney(c)}</td>
+        <td style="color:${col};font-weight:600">${d==null?"—":fmtSigned(d)}</td></tr>`;
+    }).join("")+
+    `</tbody></table>`;
+}
+
+function esc(s){return (s||"").toString().replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+</script>
+</body>
+</html>

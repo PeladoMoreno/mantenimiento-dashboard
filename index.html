@@ -413,7 +413,13 @@ const parseD = s => { if(!s) return null; const d=new Date(s+"T00:00:00"); retur
 const fmtMoney = n => (n==null||n==="")?"—":new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(Number(n));
 const fmtSigned = n => { n=Number(n)||0; const s=fmtMoney(Math.abs(n)); return n>0?("+"+s):n<0?("−"+s):s; };
 const fmtD = d => d? d.toLocaleDateString("es-AR",{day:"2-digit",month:"short"}) : "—";
-const prioColor = p => p<=1?"#ef4444":p<=3?"#f59e0b":p<=6?"#3b82f6":"#475569";
+// Prioridad → bucket: 0-2 Urgente, 3-6 Media, 7-9 Baja
+const PRIO = { urgente:{label:"Urgente",color:"#ef4444"}, media:{label:"Media",color:"#f59e0b"}, baja:{label:"Baja",color:"#64748b"} };
+const prioBucket = p => (p==null||p==="")?null : Number(p)<=2?"urgente" : Number(p)<=6?"media" : "baja";
+const prioLabel = p => { const b=prioBucket(p); return b?PRIO[b].label:"—"; };
+const prioColor = p => { const b=prioBucket(p); return b?PRIO[b].color:"#475569"; };
+// Orden por ID (numérico: T-001, T-002, … T-010)
+const byId = (a,b) => (a.id||"").localeCompare((b.id||""), undefined, {numeric:true});
 
 const tareas = DB.tareas||[];
 document.getElementById("meta").textContent =
@@ -443,8 +449,7 @@ document.getElementById("cards").innerHTML = cards.map(c=>
 // ---- Gantt ----
 // Incluye toda tarea con fecha de inicio. Si no tiene fin estimada, se dibuja
 // como barra abierta (punteada) desde el inicio.
-const conFechas = tareas.filter(t=>parseD(t.fecha_inicio))
-  .sort((a,b)=>parseD(a.fecha_inicio)-parseD(b.fecha_inicio));
+const conFechas = tareas.filter(t=>parseD(t.fecha_inicio)).sort(byId);
 const gEl = document.getElementById("gantt");
 if(!conFechas.length){
   gEl.innerHTML = '<div class="gantt"><div class="empty">No hay tareas con fecha de inicio. Cargá fecha de inicio (y fin estimada) para verlas acá.</div></div>';
@@ -455,8 +460,11 @@ if(!conFechas.length){
     min=Math.min(min,s); max=Math.max(max, e||s);
   });
   const hoy=new Date(); hoy.setHours(0,0,0,0);
-  min=Math.min(min,hoy); max=Math.max(max,hoy);
-  const pad=(max-min)*0.06||7*86400000; min-=pad; max+=pad;
+  // Escala: arranca en "hoy" (o antes si hay tareas previas) y siempre muestra
+  // al menos 2 meses hacia adelante desde hoy.
+  const dosMeses=new Date(hoy); dosMeses.setMonth(dosMeses.getMonth()+2);
+  min=Math.min(min,hoy); max=Math.max(max,hoy,dosMeses.getTime());
+  const pad=(max-min)*0.04||5*86400000; min-=pad; max+=pad;
   const span=max-min;
   const pct = d => ((d-min)/span*100);
   // ticks ~ inicio de cada mes
@@ -473,7 +481,7 @@ if(!conFechas.length){
       const width=Math.max(pct(e)-pct(s),1.2);
       return `<div class="grow">
         <div class="glabel"><span class="nm">${esc(t.nombre)}</span>
-          <span class="sub"><span class="id">${t.id||""}</span> · P${t.prioridad??"—"} · ${info.label}</span></div>
+          <span class="sub"><span class="id">${t.id||""}</span> · ${prioLabel(t.prioridad)} · ${esc(t.tipo||"—")} · ${info.label}</span></div>
         <div class="gtrack"><div class="hoy" style="left:${pct(hoy)}%"></div>
           <div class="gbar" style="left:${left}%;width:${width}%;background:${info.raw}"
             title="${esc(t.nombre)} (${fmtD(s)} → ${fmtD(e)})">${fmtD(s)} → ${fmtD(e)}</div></div></div>`;
@@ -482,7 +490,7 @@ if(!conFechas.length){
       const width=Math.max(100-left-2, 6);
       return `<div class="grow">
         <div class="glabel"><span class="nm">${esc(t.nombre)}</span>
-          <span class="sub"><span class="id">${t.id||""}</span> · P${t.prioridad??"—"} · ${info.label} · sin fin est.</span></div>
+          <span class="sub"><span class="id">${t.id||""}</span> · ${prioLabel(t.prioridad)} · ${esc(t.tipo||"—")} · ${info.label} · sin fin est.</span></div>
         <div class="gtrack"><div class="hoy" style="left:${pct(hoy)}%"></div>
           <div class="gbar gbar-open" style="left:${left}%;width:${width}%;border-color:${info.raw};color:${info.raw}"
             title="${esc(t.nombre)} (desde ${fmtD(s)}, sin fin estimada)">▸ desde ${fmtD(s)}</div></div></div>`;
@@ -492,19 +500,19 @@ if(!conFechas.length){
 }
 
 // ---- Pendientes (estado pendiente o planificada, no terminadas) ----
-const pend = tareas.filter(t=>["pendiente","planificada"].includes(norm(t.estado)))
-  .sort((a,b)=>(a.prioridad-b.prioridad)|| (parseD(a.fecha_inicio)||Infinity)-(parseD(b.fecha_inicio)||Infinity));
+const pend = tareas.filter(t=>["pendiente","planificada"].includes(norm(t.estado))).sort(byId);
 const pEl=document.getElementById("pendientes");
 if(!pend.length){
   pEl.innerHTML='<table><tbody><tr><td class="empty">No hay tareas pendientes ni planificadas. 🎉</td></tr></tbody></table>';
 }else{
   pEl.innerHTML = `<table><thead><tr>
-    <th>ID</th><th>Prioridad</th><th>Tarea</th><th>Estado</th><th>Inicio</th><th>Fin est.</th><th>Presupuesto</th>
+    <th>ID</th><th>Prioridad</th><th>Tarea</th><th>Tipo</th><th>Estado</th><th>Inicio</th><th>Fin est.</th><th>Presupuesto</th>
     </tr></thead><tbody>`+
     pend.map(t=>{const info=estadoInfo(t.estado);return `<tr>
       <td class="id">${t.id||""}</td>
-      <td><span class="prio" style="background:${prioColor(t.prioridad)};color:#fff">${t.prioridad}</span></td>
-      <td><strong>${esc(t.nombre)}</strong><br><span style="color:var(--muted);font-size:12px">${esc(t.descripcion||"")}</span></td>
+      <td><span class="prio" style="background:${prioColor(t.prioridad)};color:#fff">${prioLabel(t.prioridad)}</span></td>
+      <td><strong>${esc(t.nombre)}</strong>${t.descripcion?`<br><span style="color:var(--muted);font-size:12px">${esc(t.descripcion)}</span>`:""}</td>
+      <td>${esc(t.tipo||"—")}</td>
       <td><span class="badge" style="background:${info.raw}">${info.label}</span></td>
       <td>${fmtD(parseD(t.fecha_inicio))}</td>
       <td>${fmtD(parseD(t.fecha_fin_estimada))}</td>
@@ -513,13 +521,13 @@ if(!pend.length){
 }
 
 // ---- Terminadas (presupuesto vs costo final, desvío) ----
-const term = terminadas.slice().sort((a,b)=>(parseD(b.actualizada)||0)-(parseD(a.actualizada)||0));
+const term = terminadas.slice().sort(byId);
 const tEl=document.getElementById("terminadas");
 if(!term.length){
   tEl.innerHTML='<table><tbody><tr><td class="empty">Todavía no hay tareas terminadas.</td></tr></tbody></table>';
 }else{
   tEl.innerHTML = `<table><thead><tr>
-    <th>ID</th><th>Tarea</th><th>Fin est.</th><th>Presupuesto</th><th>Costo final</th><th>Desvío</th>
+    <th>ID</th><th>Tarea</th><th>Tipo</th><th>Fin est.</th><th>Presupuesto</th><th>Costo final</th><th>Desvío</th>
     </tr></thead><tbody>`+
     term.map(t=>{
       const p=t.presupuesto, c=t.costo_final;
@@ -529,6 +537,7 @@ if(!term.length){
       return `<tr>
         <td class="id">${t.id||""}</td>
         <td><strong>${esc(t.nombre)}</strong></td>
+        <td>${esc(t.tipo||"—")}</td>
         <td>${fmtD(parseD(t.fecha_fin_estimada))}</td>
         <td>${fmtMoney(p)}</td>
         <td>${(c==null||c==="")?'<span style="color:var(--muted)">pendiente</span>':fmtMoney(c)}</td>

@@ -81,11 +81,11 @@
 // Los datos se inyectan al regenerar este archivo.
 const DB = {
   "proyecto": "AdminEco",
-  "actualizado": "2026-06-20T12:57:09-03:00",
+  "actualizado": "2026-06-20T14:50:23-03:00",
   "ultimo_id": 11,
   "tareas": [
     {
-      "id": "T-001",
+      "id": "1",
       "nombre": "Reparar puerta de cerco perimetral (esquina cartel del barrio)",
       "descripcion": "",
       "tipo": "herreria",
@@ -111,13 +111,16 @@ const DB = {
           "ts": "2026-06-20T11:51:39-03:00",
           "accion": "actualizada",
           "cambios": {
-            "prioridad": { "de": null, "a": 0 }
+            "prioridad": {
+              "de": null,
+              "a": 0
+            }
           }
         }
       ]
     },
     {
-      "id": "T-002",
+      "id": "2",
       "nombre": "Viga sobre pase (esquina cartel)",
       "descripcion": "Colocar viga sobre el pase para que quede a nivel con el cerco eléctrico",
       "tipo": "construccion",
@@ -144,7 +147,7 @@ const DB = {
       ]
     },
     {
-      "id": "T-003",
+      "id": "3",
       "nombre": "Retirar postes enterrados sobre boulevard",
       "descripcion": "Retirar los postes enterrados, nivelar con tierra negra y hacer disposal de los palos",
       "tipo": "jardineria",
@@ -171,7 +174,7 @@ const DB = {
       ]
     },
     {
-      "id": "T-004",
+      "id": "4",
       "nombre": "Limpieza de cámaras de vigilancia",
       "descripcion": "",
       "tipo": "limpieza",
@@ -197,7 +200,7 @@ const DB = {
       ]
     },
     {
-      "id": "T-005",
+      "id": "5",
       "nombre": "Tomas nuevos en garita y mantenimiento eléctrico",
       "descripcion": "Agregar tomas y zapatilla, revisar teclas. Agregar un toma para que se banque la estufa eléctrica",
       "tipo": "electricidad",
@@ -234,7 +237,7 @@ const DB = {
       ]
     },
     {
-      "id": "T-006",
+      "id": "6",
       "nombre": "Luz de emergencia en garita",
       "descripcion": "Instalar luz de emergencia que se prenda automáticamente frente a un corte de luz",
       "tipo": "electricidad",
@@ -261,7 +264,7 @@ const DB = {
       ]
     },
     {
-      "id": "T-007",
+      "id": "7",
       "nombre": "Comprar estufa eléctrica a aceite para la garita",
       "descripcion": "",
       "tipo": "adecuacion de garita",
@@ -287,7 +290,7 @@ const DB = {
       ]
     },
     {
-      "id": "T-008",
+      "id": "8",
       "nombre": "Poda de los árboles",
       "descripcion": "",
       "tipo": "jardineria",
@@ -314,13 +317,16 @@ const DB = {
           "ts": "2026-06-20T12:19:05-03:00",
           "accion": "actualizada",
           "cambios": {
-            "prioridad": { "de": null, "a": 0 }
+            "prioridad": {
+              "de": null,
+              "a": 0
+            }
           }
         }
       ]
     },
     {
-      "id": "T-009",
+      "id": "9",
       "nombre": "Limpieza y zanjeo",
       "descripcion": "Limpieza y remoción de material en zanjas y pases",
       "tipo": "limpieza",
@@ -347,7 +353,7 @@ const DB = {
       ]
     },
     {
-      "id": "T-010",
+      "id": "10",
       "nombre": "Comprar linterna táctica FENIX recargable",
       "descripcion": "",
       "tipo": "compras",
@@ -373,7 +379,7 @@ const DB = {
       ]
     },
     {
-      "id": "T-011",
+      "id": "11",
       "nombre": "Instalación de lomo de burro sobre la 460",
       "descripcion": "",
       "tipo": "construccion",
@@ -413,13 +419,13 @@ const parseD = s => { if(!s) return null; const d=new Date(s+"T00:00:00"); retur
 const fmtMoney = n => (n==null||n==="")?"—":new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(Number(n));
 const fmtSigned = n => { n=Number(n)||0; const s=fmtMoney(Math.abs(n)); return n>0?("+"+s):n<0?("−"+s):s; };
 const fmtD = d => d? d.toLocaleDateString("es-AR",{day:"2-digit",month:"short"}) : "—";
-// Prioridad → bucket: 0-2 Urgente, 3-6 Media, 7-9 Baja
-const PRIO = { urgente:{label:"Urgente",color:"#ef4444"}, media:{label:"Media",color:"#f59e0b"}, baja:{label:"Baja",color:"#64748b"} };
-const prioBucket = p => (p==null||p==="")?null : Number(p)<=2?"urgente" : Number(p)<=6?"media" : "baja";
+// Prioridad → bucket: 0-1 Alta, 2-5 Media, 6-9 Baja
+const PRIO = { alta:{label:"Alta",color:"#ef4444"}, media:{label:"Media",color:"#f59e0b"}, baja:{label:"Baja",color:"#64748b"} };
+const prioBucket = p => (p==null||p==="")?null : Number(p)<=1?"alta" : Number(p)<=5?"media" : "baja";
 const prioLabel = p => { const b=prioBucket(p); return b?PRIO[b].label:"—"; };
 const prioColor = p => { const b=prioBucket(p); return b?PRIO[b].color:"#475569"; };
-// Orden por ID (numérico: T-001, T-002, … T-010)
-const byId = (a,b) => (a.id||"").localeCompare((b.id||""), undefined, {numeric:true});
+// Orden por ID (numérico: 1, 2, … 10)
+const byId = (a,b) => String(a.id||"").localeCompare(String(b.id||""), undefined, {numeric:true});
 
 const tareas = DB.tareas||[];
 document.getElementById("meta").textContent =

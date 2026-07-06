@@ -595,8 +595,9 @@ const desvioTotal = terminadas.reduce((a,t)=>{
 },0);
 const cards = [
   {n:tareas.length,l:"Tareas totales"},
-  {n:counts["en ejecucion"]||0,l:"En ejecución"},
   {n:counts.pendiente||0,l:"Pendientes"},
+  {n:counts.planificada||0,l:"Planificadas",color:"var(--planificada)"},
+  {n:counts["en ejecucion"]||0,l:"En ejecución"},
   {n:counts.terminada||0,l:"Terminadas"},
   {n:fmtMoney(presupuestoTotal),l:"Presupuesto total"},
   {n:fmtSigned(desvioTotal),l:"Desvío acumulado",color:desvioTotal>0?"#ef4444":desvioTotal<0?"#22c55e":null}

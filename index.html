@@ -81,7 +81,7 @@
 // Los datos se inyectan al regenerar este archivo.
 const DB = {
   "proyecto": "AdminEco",
-  "actualizado": "2026-07-06T18:50:11-03:00",
+  "actualizado": "2026-07-06T18:51:47-03:00",
   "ultimo_id": 11,
   "tareas": [
     {
@@ -276,16 +276,16 @@ const DB = {
     {
       "id": "6",
       "nombre": "Luz de emergencia en garita",
-      "descripcion": "Instalar luz de emergencia que se prenda automáticamente frente a un corte de luz",
+      "descripcion": "Instalar luz de emergencia que se prenda automáticamente frente a un corte de luz. Compra de 2 unidades a $20.000 c/u.",
       "tipo": "electricidad",
       "prioridad": 0,
-      "presupuesto": null,
+      "presupuesto": 40000,
       "costo_final": null,
-      "fecha_inicio": null,
+      "fecha_inicio": "2026-07-13",
       "fecha_fin_estimada": null,
-      "estado": "pendiente",
+      "estado": "planificada",
       "creada": "2026-06-20T12:08:19-03:00",
-      "actualizada": "2026-06-20T12:08:19-03:00",
+      "actualizada": "2026-07-06T18:51:47-03:00",
       "historial": [
         {
           "ts": "2026-06-20T12:08:19-03:00",
@@ -297,6 +297,29 @@ const DB = {
             "prioridad": 0,
             "estado": "pendiente"
           }
+        },
+        {
+          "ts": "2026-07-06T18:51:47-03:00",
+          "accion": "actualizada",
+          "cambios": {
+            "descripcion": {
+              "de": "Instalar luz de emergencia que se prenda automáticamente frente a un corte de luz",
+              "a": "Instalar luz de emergencia que se prenda automáticamente frente a un corte de luz. Compra de 2 unidades a $20.000 c/u."
+            },
+            "presupuesto": {
+              "de": null,
+              "a": 40000
+            },
+            "fecha_inicio": {
+              "de": null,
+              "a": "2026-07-13"
+            },
+            "estado": {
+              "de": "pendiente",
+              "a": "planificada"
+            }
+          },
+          "nota": "Se compran 2 unidades la semana que viene, $20.000 cada una (total $40.000)."
         }
       ]
     },

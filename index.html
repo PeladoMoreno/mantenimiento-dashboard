@@ -51,6 +51,9 @@
   .prio{display:inline-block;min-width:22px;text-align:center;padding:2px 6px;border-radius:6px;font-weight:700;font-size:12px}
   .empty{color:var(--muted);padding:14px;font-style:italic}
   .id{color:var(--muted);font-variant-numeric:tabular-nums}
+  /* filas ya agendadas (con fecha de inicio → aparecen en el Gantt) */
+  tr.ongoing td{background:rgba(59,130,246,.12)}
+  tr.ongoing td:first-child{box-shadow:inset 3px 0 0 var(--planificada)}
 </style>
 </head>
 <body>
@@ -70,7 +73,7 @@
   <h2>Línea de tiempo (tareas con fechas)</h2>
   <div id="gantt"></div>
 
-  <h2>Tareas pendientes</h2>
+  <h2>Tareas pendientes <span style="text-transform:none;letter-spacing:0;font-size:12px;color:var(--muted);font-weight:400">· las resaltadas ya tienen fecha y están en el Gantt</span></h2>
   <div id="pendientes"></div>
 
   <h2>Tareas terminadas (presupuesto vs. real)</h2>
@@ -619,7 +622,7 @@ if(!pend.length){
   pEl.innerHTML = `<table><thead><tr>
     <th>ID</th><th>Prioridad</th><th>Tarea</th><th>Tipo</th><th>Estado</th><th>Inicio</th><th>Fin est.</th><th>Presupuesto</th>
     </tr></thead><tbody>`+
-    pend.map(t=>{const info=estadoInfo(t.estado);return `<tr>
+    pend.map(t=>{const info=estadoInfo(t.estado);const enGantt=!!parseD(t.fecha_inicio);return `<tr${enGantt?' class="ongoing"':''}>
       <td class="id">${t.id||""}</td>
       <td><span class="prio" style="background:${prioColor(t.prioridad)};color:#fff">${prioLabel(t.prioridad)}</span></td>
       <td><strong>${esc(t.nombre)}</strong>${t.descripcion?`<br><span style="color:var(--muted);font-size:12px">${esc(t.descripcion)}</span>`:""}</td>

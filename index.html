@@ -601,8 +601,7 @@ const cards = [
   {n:counts["en ejecucion"]||0,l:"En ejecución"},
   {n:counts.terminada||0,l:"Terminadas"},
   {n:fmtMoney(presupuestoTotal),l:"Presupuesto total (planificado)"},
-  {n:fmtMoney(ejecutadoTotal),l:"Presupuesto ejecutado (real)"},
-  {n:fmtSigned(desvioTotal),l:"Desvío acumulado",color:desvioTotal>0?"#ef4444":desvioTotal<0?"#22c55e":null}
+  {n:fmtMoney(ejecutadoTotal),l:"Presupuesto ejecutado (real)"}
 ];
 document.getElementById("cards").innerHTML = cards.map(c=>
   `<div class="card"><div class="n"${c.color?` style="color:${c.color}"`:""}>${c.n}</div><div class="l">${c.l}</div></div>`).join("");

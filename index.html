@@ -81,7 +81,7 @@
 // Los datos se inyectan al regenerar este archivo.
 const DB = {
   "proyecto": "AdminEco",
-  "actualizado": "2026-07-06T18:51:47-03:00",
+  "actualizado": "2026-07-06T18:53:26-03:00",
   "ultimo_id": 11,
   "tareas": [
     {
@@ -437,16 +437,16 @@ const DB = {
     {
       "id": "10",
       "nombre": "Comprar linterna táctica FENIX recargable",
-      "descripcion": "",
+      "descripcion": "Compra de 2 unidades. Monto total $70.000 por las dos.",
       "tipo": "compras",
       "prioridad": 0,
-      "presupuesto": null,
+      "presupuesto": 70000,
       "costo_final": null,
-      "fecha_inicio": null,
+      "fecha_inicio": "2026-07-13",
       "fecha_fin_estimada": null,
-      "estado": "pendiente",
+      "estado": "planificada",
       "creada": "2026-06-20T12:24:59-03:00",
-      "actualizada": "2026-06-20T12:24:59-03:00",
+      "actualizada": "2026-07-06T18:53:26-03:00",
       "historial": [
         {
           "ts": "2026-06-20T12:24:59-03:00",
@@ -457,6 +457,29 @@ const DB = {
             "prioridad": 0,
             "estado": "pendiente"
           }
+        },
+        {
+          "ts": "2026-07-06T18:53:26-03:00",
+          "accion": "actualizada",
+          "cambios": {
+            "descripcion": {
+              "de": "",
+              "a": "Compra de 2 unidades. Monto total $70.000 por las dos."
+            },
+            "presupuesto": {
+              "de": null,
+              "a": 70000
+            },
+            "fecha_inicio": {
+              "de": null,
+              "a": "2026-07-13"
+            },
+            "estado": {
+              "de": "pendiente",
+              "a": "planificada"
+            }
+          },
+          "nota": "Se compran 2 linternas la semana que viene, $70.000 total por las dos."
         }
       ]
     },

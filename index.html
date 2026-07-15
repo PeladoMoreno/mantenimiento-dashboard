@@ -82,9 +82,9 @@
 
 <script>
 // Los datos se inyectan al regenerar este archivo.
-const DB = /*__DATA__*/{
+const DB = {
   "proyecto": "AdminEco",
-  "actualizado": "2026-07-10T12:13:33-03:00",
+  "actualizado": "2026-07-14T21:56:31-03:00",
   "ultimo_id": 13,
   "tareas": [
     {
@@ -174,16 +174,16 @@ const DB = /*__DATA__*/{
     {
       "id": "3",
       "nombre": "Retirar postes enterrados sobre boulevard",
-      "descripcion": "Retirar los postes enterrados, nivelar con tierra negra y hacer disposal de los palos",
+      "descripcion": "Sacar los postes remanentes del boulevard, cortarlos y disponerlos en contenedor, y nivelar con arena",
       "tipo": "jardineria",
       "prioridad": 1,
-      "presupuesto": null,
+      "presupuesto": 150000,
       "costo_final": null,
-      "fecha_inicio": null,
-      "fecha_fin_estimada": null,
-      "estado": "pendiente",
+      "fecha_inicio": "2026-07-17",
+      "fecha_fin_estimada": "2026-07-21",
+      "estado": "planificada",
       "creada": "2026-06-20T12:02:29-03:00",
-      "actualizada": "2026-06-20T12:02:29-03:00",
+      "actualizada": "2026-07-14T21:56:31-03:00",
       "historial": [
         {
           "ts": "2026-06-20T12:02:29-03:00",
@@ -195,6 +195,33 @@ const DB = /*__DATA__*/{
             "prioridad": 1,
             "estado": "pendiente"
           }
+        },
+        {
+          "ts": "2026-07-14T21:56:31-03:00",
+          "accion": "actualizada",
+          "cambios": {
+            "descripcion": {
+              "de": "Retirar los postes enterrados, nivelar con tierra negra y hacer disposal de los palos",
+              "a": "Sacar los postes remanentes del boulevard, cortarlos y disponerlos en contenedor, y nivelar con arena"
+            },
+            "presupuesto": {
+              "de": null,
+              "a": 150000
+            },
+            "fecha_inicio": {
+              "de": null,
+              "a": "2026-07-17"
+            },
+            "fecha_fin_estimada": {
+              "de": null,
+              "a": "2026-07-21"
+            },
+            "estado": {
+              "de": "pendiente",
+              "a": "planificada"
+            }
+          },
+          "nota": "Se confirma la obra: ejecución del viernes 17 al martes 21 de julio. Cambia el método: se cortan los postes y se disponen en contenedor, y se nivela con arena (antes tierra negra y disposal de los palos)."
         }
       ]
     },

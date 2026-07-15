@@ -84,7 +84,7 @@
 // Los datos se inyectan al regenerar este archivo.
 const DB = {
   "proyecto": "AdminEco",
-  "actualizado": "2026-07-14T21:56:31-03:00",
+  "actualizado": "2026-07-14T22:03:34-03:00",
   "ultimo_id": 13,
   "tareas": [
     {
@@ -152,11 +152,11 @@ const DB = {
       "prioridad": 0,
       "presupuesto": null,
       "costo_final": null,
-      "fecha_inicio": null,
-      "fecha_fin_estimada": null,
-      "estado": "pendiente",
+      "fecha_inicio": "2026-07-13",
+      "fecha_fin_estimada": "2026-07-23",
+      "estado": "planificada",
       "creada": "2026-06-20T11:57:27-03:00",
-      "actualizada": "2026-06-20T11:57:27-03:00",
+      "actualizada": "2026-07-14T22:03:34-03:00",
       "historial": [
         {
           "ts": "2026-06-20T11:57:27-03:00",
@@ -168,6 +168,25 @@ const DB = {
             "prioridad": 0,
             "estado": "pendiente"
           }
+        },
+        {
+          "ts": "2026-07-14T22:03:34-03:00",
+          "accion": "actualizada",
+          "cambios": {
+            "fecha_inicio": {
+              "de": null,
+              "a": "2026-07-13"
+            },
+            "fecha_fin_estimada": {
+              "de": null,
+              "a": "2026-07-23"
+            },
+            "estado": {
+              "de": "pendiente",
+              "a": "planificada"
+            }
+          },
+          "nota": "Planificada del 13 al 23 de julio. Presupuesto todavía sin definir."
         }
       ]
     },

@@ -84,7 +84,7 @@
 // Los datos se inyectan al regenerar este archivo.
 const DB = {
   "proyecto": "AdminEco",
-  "actualizado": "2026-07-14T22:03:34-03:00",
+  "actualizado": "2026-07-18T19:42:21-03:00",
   "ultimo_id": 13,
   "tareas": [
     {
@@ -197,12 +197,12 @@ const DB = {
       "tipo": "jardineria",
       "prioridad": 1,
       "presupuesto": 150000,
-      "costo_final": null,
+      "costo_final": 150000,
       "fecha_inicio": "2026-07-17",
-      "fecha_fin_estimada": "2026-07-21",
-      "estado": "planificada",
+      "fecha_fin_estimada": "2026-07-17",
+      "estado": "terminada",
       "creada": "2026-06-20T12:02:29-03:00",
-      "actualizada": "2026-07-14T21:56:31-03:00",
+      "actualizada": "2026-07-18T19:42:21-03:00",
       "historial": [
         {
           "ts": "2026-06-20T12:02:29-03:00",
@@ -241,6 +241,25 @@ const DB = {
             }
           },
           "nota": "Se confirma la obra: ejecución del viernes 17 al martes 21 de julio. Cambia el método: se cortan los postes y se disponen en contenedor, y se nivela con arena (antes tierra negra y disposal de los palos)."
+        },
+        {
+          "ts": "2026-07-18T19:42:21-03:00",
+          "accion": "actualizada",
+          "cambios": {
+            "fecha_fin_estimada": {
+              "de": "2026-07-21",
+              "a": "2026-07-17"
+            },
+            "costo_final": {
+              "de": null,
+              "a": 150000
+            },
+            "estado": {
+              "de": "planificada",
+              "a": "terminada"
+            }
+          },
+          "nota": "Terminada el 17 de julio. Costo final $150.000 (igual al presupuesto, desvío $0)."
         }
       ]
     },
@@ -354,9 +373,9 @@ const DB = {
       "costo_final": null,
       "fecha_inicio": "2026-07-13",
       "fecha_fin_estimada": "2026-07-17",
-      "estado": "planificada",
+      "estado": "terminada",
       "creada": "2026-06-20T12:08:19-03:00",
-      "actualizada": "2026-07-06T19:11:09-03:00",
+      "actualizada": "2026-07-18T19:42:21-03:00",
       "historial": [
         {
           "ts": "2026-06-20T12:08:19-03:00",
@@ -402,6 +421,17 @@ const DB = {
             }
           },
           "nota": "Fin estimado: viernes 17 de julio."
+        },
+        {
+          "ts": "2026-07-18T19:42:21-03:00",
+          "accion": "actualizada",
+          "cambios": {
+            "estado": {
+              "de": "planificada",
+              "a": "terminada"
+            }
+          },
+          "nota": "Compra completada. Costo final todavía sin cargar (queda pendiente)."
         }
       ]
     },
@@ -526,9 +556,9 @@ const DB = {
       "costo_final": null,
       "fecha_inicio": "2026-07-13",
       "fecha_fin_estimada": "2026-07-17",
-      "estado": "planificada",
+      "estado": "terminada",
       "creada": "2026-06-20T12:24:59-03:00",
-      "actualizada": "2026-07-06T19:11:09-03:00",
+      "actualizada": "2026-07-18T19:42:21-03:00",
       "historial": [
         {
           "ts": "2026-06-20T12:24:59-03:00",
@@ -573,6 +603,17 @@ const DB = {
             }
           },
           "nota": "Fin estimado: viernes 17 de julio."
+        },
+        {
+          "ts": "2026-07-18T19:42:21-03:00",
+          "accion": "actualizada",
+          "cambios": {
+            "estado": {
+              "de": "planificada",
+              "a": "terminada"
+            }
+          },
+          "nota": "Compra completada. Costo final todavía sin cargar (queda pendiente)."
         }
       ]
     },

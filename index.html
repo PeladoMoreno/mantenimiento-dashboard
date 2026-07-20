@@ -84,7 +84,7 @@
 // Los datos se inyectan al regenerar este archivo.
 const DB = {
   "proyecto": "AdminEco",
-  "actualizado": "2026-07-18T19:46:59-03:00",
+  "actualizado": "2026-07-20T13:33:32-03:00",
   "ultimo_id": 13,
   "tareas": [
     {
@@ -317,11 +317,11 @@ const DB = {
       "prioridad": 0,
       "presupuesto": null,
       "costo_final": null,
-      "fecha_inicio": "2026-07-13",
-      "fecha_fin_estimada": "2026-07-17",
+      "fecha_inicio": "2026-07-27",
+      "fecha_fin_estimada": "2026-07-31",
       "estado": "planificada",
       "creada": "2026-06-20T12:07:35-03:00",
-      "actualizada": "2026-07-06T19:11:09-03:00",
+      "actualizada": "2026-07-20T13:33:32-03:00",
       "historial": [
         {
           "ts": "2026-06-20T12:07:35-03:00",
@@ -380,6 +380,21 @@ const DB = {
             }
           },
           "nota": "Fin estimado: viernes 17 de julio."
+        },
+        {
+          "ts": "2026-07-20T13:33:32-03:00",
+          "accion": "actualizada",
+          "cambios": {
+            "fecha_inicio": {
+              "de": "2026-07-13",
+              "a": "2026-07-27"
+            },
+            "fecha_fin_estimada": {
+              "de": "2026-07-17",
+              "a": "2026-07-31"
+            }
+          },
+          "nota": "Reprogramada para la semana del 27 de julio (se resuelve esa semana). Sigue planificada."
         }
       ]
     },
@@ -390,12 +405,12 @@ const DB = {
       "tipo": "electricidad",
       "prioridad": 0,
       "presupuesto": 40000,
-      "costo_final": null,
+      "costo_final": 52000,
       "fecha_inicio": "2026-07-13",
       "fecha_fin_estimada": "2026-07-17",
       "estado": "terminada",
       "creada": "2026-06-20T12:08:19-03:00",
-      "actualizada": "2026-07-18T19:42:21-03:00",
+      "actualizada": "2026-07-20T13:33:32-03:00",
       "historial": [
         {
           "ts": "2026-06-20T12:08:19-03:00",
@@ -452,6 +467,17 @@ const DB = {
             }
           },
           "nota": "Compra completada. Costo final todavía sin cargar (queda pendiente)."
+        },
+        {
+          "ts": "2026-07-20T13:33:32-03:00",
+          "accion": "actualizada",
+          "cambios": {
+            "costo_final": {
+              "de": null,
+              "a": 52000
+            }
+          },
+          "nota": "Costo final cargado: $52.000 por las 2 unidades (presupuesto $40.000, desvío +$12.000)."
         }
       ]
     },
@@ -583,12 +609,12 @@ const DB = {
       "tipo": "compras",
       "prioridad": 0,
       "presupuesto": 70000,
-      "costo_final": null,
+      "costo_final": 204000,
       "fecha_inicio": "2026-07-13",
       "fecha_fin_estimada": "2026-07-17",
       "estado": "terminada",
       "creada": "2026-06-20T12:24:59-03:00",
-      "actualizada": "2026-07-18T19:42:21-03:00",
+      "actualizada": "2026-07-20T13:33:32-03:00",
       "historial": [
         {
           "ts": "2026-06-20T12:24:59-03:00",
@@ -644,6 +670,17 @@ const DB = {
             }
           },
           "nota": "Compra completada. Costo final todavía sin cargar (queda pendiente)."
+        },
+        {
+          "ts": "2026-07-20T13:33:32-03:00",
+          "accion": "actualizada",
+          "cambios": {
+            "costo_final": {
+              "de": null,
+              "a": 204000
+            }
+          },
+          "nota": "Costo final cargado: $204.000 por las 2 linternas (presupuesto $70.000, desvío +$134.000)."
         }
       ]
     },

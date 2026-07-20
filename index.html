@@ -817,9 +817,10 @@ document.getElementById("cards").innerHTML = cards.map(c=>
   `<div class="card"><div class="n"${c.color?` style="color:${c.color}"`:""}>${c.n}</div><div class="l">${c.l}</div></div>`).join("");
 
 // ---- Gantt ----
-// Incluye toda tarea con fecha de inicio. Si no tiene fin estimada, se dibuja
-// como barra abierta (punteada) desde el inicio.
-const conFechas = tareas.filter(t=>parseD(t.fecha_inicio)).sort(byId);
+// Incluye toda tarea con fecha de inicio que NO esté terminada. Las terminadas
+// se sacan del Gantt (figuran solo en la tabla de terminadas). Si no tiene fin
+// estimada, se dibuja como barra abierta (punteada) desde el inicio.
+const conFechas = tareas.filter(t=>parseD(t.fecha_inicio) && norm(t.estado)!=="terminada").sort(byId);
 const gEl = document.getElementById("gantt");
 if(!conFechas.length){
   gEl.innerHTML = '<div class="gantt"><div class="empty">No hay tareas con fecha de inicio. Cargá fecha de inicio (y fin estimada) para verlas acá.</div></div>';
